@@ -628,14 +628,14 @@ Generate a COMPLETE reading guide covering the ENTIRE book — all chapters from
 CRITICAL: Use your full knowledge. Provide real, specific chapter summaries and analysis for every chapter. Never say you cannot provide information.
 
 RESPOND WITH ONLY VALID JSON (no markdown fences, no explanation):
-{"bookTitle":"exact title","author":"full author name","overview":"3 engaging sentences about what makes this book special","tabs":[{"id":"chapters","label":"Chapter guide","type":"chapters","chapters":[{"id":"ch1","label":"Ch. 1","title":"real chapter title","summary":"2-3 sentences of what actually happens","insights":"1-2 specific craft or theme observations","questions":"1 thought-provoking question"}]},{"id":"themes","label":"Themes","type":"prose","content":"rich markdown analysis"},{"id":"characters","label":"Characters","type":"prose","content":"markdown character analysis"}],"suggestedQuestions":["specific Q1?","specific Q2?","specific Q3?","specific Q4?"]}
+{"bookTitle":"exact title","author":"full author name","overview":"2 sentences about this book","tabs":[{"id":"chapters","label":"Chapter guide","type":"chapters","chapters":[{"id":"ch1","label":"Ch. 1","title":"chapter title","summary":"1-2 sentences","insights":"1 observation","questions":"1 question"}]},{"id":"themes","label":"Themes","type":"prose","content":"markdown"},{"id":"characters","label":"Characters","type":"prose","content":"markdown"}],"suggestedQuestions":["Q1?","Q2?","Q3?","Q4?"]}
 
-Only include tabs for: ${typesStr}. Every chapter must have real content. Be specific to THIS book.`;
+Keep each chapter entry brief — 1-2 sentences per field maximum. Only include tabs for: ${typesStr}. Be specific to THIS book.`;
 
   try{
     const res=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2500,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:3500,messages:[{role:'user',content:prompt}]})
     });
     const text=await res.text();
     if(!text)throw new Error('Empty response — check API key in Netlify environment variables');
