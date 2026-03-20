@@ -621,16 +621,14 @@ async function fetchGuide(){
   const{title,author,goal,types}=currentBook;
   const authorStr=author?` by ${author}`:'';
   const typesStr=types.join(', ');
-  const prompt=`You are an expert literary analyst with comprehensive knowledge of published literature. The user is reading "${title}"${authorStr}. Their goal: ${goal}.
+  const prompt=`You are an expert literary analyst. The user is reading "${title}"${authorStr}. Goal: ${goal}.
 
-Generate a COMPLETE reading guide covering the ENTIRE book — all chapters from first to last. Do not skip any chapters.
+Generate a reading guide. For chapters: include up to 12 key chapters/sections (not every single chapter — group minor ones if needed).
 
-CRITICAL: Use your full knowledge. Provide real, specific chapter summaries and analysis for every chapter. Never say you cannot provide information.
+RESPOND WITH ONLY VALID JSON (no markdown fences, nothing before or after the JSON):
+{"bookTitle":"title","author":"author name","overview":"2 sentences about this book","tabs":[{"id":"chapters","label":"Chapter guide","type":"chapters","chapters":[{"id":"ch1","label":"Ch. 1","title":"title","summary":"1 sentence","insights":"1 observation","questions":"1 question"}]},{"id":"themes","label":"Themes","type":"prose","content":"2-3 paragraphs in markdown"},{"id":"characters","label":"Characters","type":"prose","content":"2-3 paragraphs in markdown"}],"suggestedQuestions":["Q1?","Q2?","Q3?","Q4?"]}
 
-RESPOND WITH ONLY VALID JSON (no markdown fences, no explanation):
-{"bookTitle":"exact title","author":"full author name","overview":"2 sentences about this book","tabs":[{"id":"chapters","label":"Chapter guide","type":"chapters","chapters":[{"id":"ch1","label":"Ch. 1","title":"chapter title","summary":"1-2 sentences","insights":"1 observation","questions":"1 question"}]},{"id":"themes","label":"Themes","type":"prose","content":"markdown"},{"id":"characters","label":"Characters","type":"prose","content":"markdown"}],"suggestedQuestions":["Q1?","Q2?","Q3?","Q4?"]}
-
-Keep each chapter entry brief — 1-2 sentences per field maximum. Only include tabs for: ${typesStr}. Be specific to THIS book.`;
+Rules: Max 12 chapter entries. Each field max 1 sentence. Only include tabs for: ${typesStr}. Real specific content only.`;`;
 
   try{
     const res=await fetch('/api/claude',{
