@@ -640,9 +640,11 @@ Rules: Max 12 chapter entries. Each field max 1 sentence. Only include tabs for:
     let data;
     try{data=JSON.parse(text);}catch(e){throw new Error('Server error: '+text.slice(0,150));}
     if(!res.ok)throw new Error(data.error?.message||'API error '+res.status);
-    const rawText=data.content.map(b=>b.text||'').join('');
-    const cleaned=rawText.replace(/^[\s\S]*?(\{)/,'$1').replace(/\}[\s\S]*$/,'}');
-    const guide=JSON.parse(cleaned);
+    const rawText=data.content.map(b=>b.text||'').join('').trim();
+    const start=rawText.indexOf('{');
+    const end=rawText.lastIndexOf('}');
+    if(start===-1||end===-1)throw new Error('No JSON found in response');
+    const guide=JSON.parse(rawText.slice(start,end+1));
     currentGuide=guide;
     stopLoading();
     await saveToLog(guide);
@@ -700,10 +702,10 @@ function renderGuide(guide){
       panelsEl.appendChild(panel);
       buildChapterList(tab.chapters||[]);
     }else if(tab.type==='overview'){
-      panel.innerHTML=`<div class="guide-content"><p class="drop-cap">${escHtml(tab.content)}</p></div>`;
+      panel.innerHTML='<div class="guide-content"><p class="drop-cap">'+escHtml(tab.content)+'</p></div>';
       panelsEl.appendChild(panel);
     }else{
-      panel.innerHTML=`<div class="guide-content">${markdownToHtml(tab.content)}</div>`;
+      panel.innerHTML='<div class="guide-content">'+markdownToHtml(tab.content)+'</div>';
       panelsEl.appendChild(panel);
     }
   });
@@ -732,20 +734,19 @@ function buildChapterList(chapters){
     const div=document.createElement('div');
     div.className='ch-item';
     div.dataset.idx=String(idx);
-    div.innerHTML=`
-      <div class="ch-head" onclick="toggleChapter('${ch.id}')">
-        <span class="ch-num-badge">${escHtml(ch.label||'Ch. '+(idx+1))}</span>
-        <span class="ch-title-text">${escHtml(ch.title||'')}</span>
-        <span class="ch-status" id="status-${ch.id}"></span>
-        <span class="ch-chevron" id="chevron-${ch.id}">▶</span>
-      </div>
-      <div class="ch-body" id="body-${ch.id}">
-        ${ch.summary?`<div class="ch-sub-label">What happens</div><p>${escHtml(ch.summary)}</p>`:''}
-        ${ch.insights?`<div class="ch-sub-label">What to notice</div><p>${escHtml(ch.insights)}</p>`:''}
-        ${ch.questions?`<div class="ch-sub-label">Questions to carry forward</div><p>${escHtml(ch.questions)}</p>`:''}
-      </div>
-      <div class="ch-hidden-hint" id="hint-${ch.id}">Move the slider to reveal this chapter</div>
-    `;
+    div.innerHTML=
+      '<div class="ch-head" onclick="toggleChapter(\''+ch.id+'\')">'
+      +'<span class="ch-num-badge">'+escHtml(ch.label||'Ch. '+(idx+1))+'</span>'
+      +'<span class="ch-title-text">'+escHtml(ch.title||'')+'</span>'
+      +'<span class="ch-status" id="status-'+ch.id+'"></span>'
+      +'<span class="ch-chevron" id="chevron-'+ch.id+'">&#9658;</span>'
+      +'</div>'
+      +'<div class="ch-body" id="body-'+ch.id+'">'
+      +(ch.summary?'<div class="ch-sub-label">What happens</div><p>'+escHtml(ch.summary)+'</p>':'')
+      +(ch.insights?'<div class="ch-sub-label">What to notice</div><p>'+escHtml(ch.insights)+'</p>':'')
+      +(ch.questions?'<div class="ch-sub-label">Questions to carry forward</div><p>'+escHtml(ch.questions)+'</p>':'')
+      +'</div>'
+      +'<div class="ch-hidden-hint" id="hint-'+ch.id+'">Move the slider to reveal this chapter</div>';
     list.appendChild(div);
   });
 }
